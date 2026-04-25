@@ -12,6 +12,7 @@ const pool = mysql.createPool({
   user:               process.env.DB_USER     || 'root',
   password:           process.env.DB_PASS     || '',
   database:           process.env.DB_NAME     || 'fightea_db',
+  ssl:                process.env.DB_SSL === 'true' ? 'Amazon RDS' : false,
   waitForConnections: true,
   connectionLimit:    10,
   queueLimit:         0,
