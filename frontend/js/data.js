@@ -163,3 +163,119 @@ function getOrderStats(){
     total:ORDERS.filter(o=>o.paymentStatus==='paid').reduce((s,o)=>s+o.total,0),
   };
 }
+/* ── INITIALIZATION ─────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', function(){
+  loadSession();
+  updateNavState();
+  renderMenu();
+  renderBestsellers();
+  initAuth();
+  initAuthTabs();
+  initImageUpload();
+});
+
+function updateNavState(){
+  const navAuthArea = document.getElementById('nav-auth-area');
+  const mobileAuthBtns = document.getElementById('mobile-auth-btns');
+  
+  if(isLoggedIn()){
+    navAuthArea.innerHTML = `
+      <span style="font-size:13px;color:var(--brown)">${App.currentUser.name.split(' ')[0]}</span>
+      <button class="navbar-link" onclick="logout()">Sign Out</button>
+      ${isAdmin() ? `<button class="navbar-link" onclick="showView('admin')">Admin</button>` : ''}
+    `;
+    mobileAuthBtns.innerHTML = `
+      <button class="btn btn-outline btn-full" onclick="logout()">Sign Out</button>
+      ${isAdmin() ? `<button class="btn btn-primary btn-full" onclick="showView('admin')">Admin Panel</button>` : ''}
+    `;
+  } else {
+    navAuthArea.innerHTML = `
+      <button class="navbar-link" onclick="showView('auth')">Sign In</button>
+      <button class="btn btn-primary btn-sm" onclick="showView('auth')">Get Started</button>
+    `;
+    mobileAuthBtns.innerHTML = `
+      <button class="btn btn-outline btn-full" onclick="showView('auth')">Sign In</button>
+      <button class="btn btn-primary btn-full" onclick="showView('auth')">Get Started</button>
+    `;
+  }
+}
+
+function initAuthTabs(){
+  document.querySelectorAll('.auth-tab').forEach(tab => {
+    tab.addEventListener('click', function(){
+      switchAuthTab(this.dataset.tab);
+    });
+  });
+}
+
+function renderMenu(){
+  // Load menu from backend or use sample data
+  if(MENU_ITEMS.length === 0) {
+    MENU_ITEMS = [
+      { id:1, cat:'Milk Tea', name:'Brown Sugar Boba', desc:'Classic with chewy tapioca', image:'', emoji:'🧋', basePrice:89, hasSizes:true, varieties:[], bestseller:true, available:true },
+      { id:2, cat:'Milk Tea', name:'Taro Milk Tea', desc:'Creamy taro flavor', image:'', emoji:'🧋', basePrice:85, hasSizes:true, varieties:[], bestseller:false, available:true },
+    ];
+    MENU_CATEGORIES = ['Milk Tea', 'Fruit Tea', 'Smoothies', 'Snacks'];
+    GLOBAL_SIZES = [
+      { id:1, label:'Small (12oz)', priceAdd:0 },
+      { id:2, label:'Medium (16oz)', priceAdd:10 },
+      { id:3, label:'Large (22oz)', priceAdd:20 },
+    ];
+  }
+}
+
+function renderBestsellers(){
+  const grid = document.getElementById('bestsellers-grid');
+  if(!grid) return;
+  const bestsellers = MENU_ITEMS.filter(i => i.bestseller && i.available);
+  grid.innerHTML = bestsellers.map(item => `
+    <div class="menu-card" onclick="openCustomizeModal(${item.id})">
+      <div class="menu-card-img">${drinkImg(item)}</div>
+      <div class="menu-card-body">
+        <h4>${item.name}</h4>
+        <p>${item.desc || ''}</p>
+        <div class="menu-card-footer">
+          <span class="menu-price">${formatCurrency(getItemDisplayPrice(item))}</span>
+          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openCustomizeModal(${item.id})">Add</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showView(viewId){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const view = document.getElementById(`view-${viewId}`);
+  if(view) {
+    view.classList.add('active');
+    App.currentView = viewId;
+    
+    if(viewId === 'admin' && !isAdmin()) {
+      showView('home');
+      showToast('Admin access required.', 'error');
+      return;
+    }
+    
+    if(viewId === 'admin') initAdmin();
+    if(viewId === 'menu') renderMenuGrid();
+  }
+}
+
+function updateCartBadge(){
+  document.querySelectorAll('.cart-count').forEach(el => el.textContent = cartCount());
+}
+
+function showToast(msg, type='info'){
+  const container = document.getElementById('toast-container');
+  if(!container) return;
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = msg;
+  toast.style.cssText = `
+    padding:12px 16px;margin-bottom:8px;border-radius:4px;
+    color:white;font-size:14px;
+    background:${type==='success'?'#4caf50':type==='error'?'#f44336':'#2196f3'};
+  `;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
