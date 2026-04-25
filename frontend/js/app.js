@@ -72,8 +72,19 @@ function initAuth(){
     const email=this.querySelector('[name="email"]').value.trim();
     const pass=this.querySelector('[name="password"]').value;
     
+    // Try local auth first (data.js USERS array)
+    const localUser = USERS.find(u => u.email === email && u.password === pass);
+    if (localUser) {
+      saveSession(localUser); 
+      showToast(`Welcome back, ${localUser.name.split(' ')[0]}! ☕`,'success');
+      if(typeof startNotifications==='function') startNotifications();
+      setTimeout(()=>isAdmin()?showView('admin'):showView('home'),500);
+      return;
+    }
+    
+    // If no local match, try backend
     try {
-      const res = await fetch(`${window.FIGHTEA_API_BASE}/auth/login`, {
+      const res = await fetch(`${window.FIGHTEA_API_BASE}auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password: pass })
@@ -91,7 +102,7 @@ function initAuth(){
       }
     } catch (err) {
       console.error('Login error:', err);
-      showToast('Connection error. Please try again.','error');
+      showToast('Invalid email or password.','error');
     }
   });
   
@@ -105,7 +116,7 @@ function initAuth(){
     if(pass!==conf){showToast('Passwords do not match.','error');return;}
     
     try {
-      const res = await fetch(`${window.FIGHTEA_API_BASE}/auth/register`, {
+      const res = await fetch(`${window.FIGHTEA_API_BASE}auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, phone, password: pass })
@@ -125,18 +136,6 @@ function initAuth(){
       showToast('Connection error. Please try again.','error');
     }
   });
-}
-
-function logout(){
-  if(typeof stopNotifications==='function') stopNotifications();
-  clearSession();App.cart=[];updateCartBadge();showView('home');
-  showToast('You have been signed out.','info');
-}
-
-function switchAuthTab(tab){
-  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
-  document.getElementById('login-form').style.display=tab==='login'?'block':'none';
-  document.getElementById('signup-form').style.display=tab==='signup'?'block':'none';
 }
 
 /* ── MENU RENDERING ──────────────────────────────────────── */
