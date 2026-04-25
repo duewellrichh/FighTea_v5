@@ -72,17 +72,6 @@ function initAuth(){
     const email=this.querySelector('[name="email"]').value.trim();
     const pass=this.querySelector('[name="password"]').value;
     
-    // Try local auth first (data.js USERS array)
-    const localUser = USERS.find(u => u.email === email && u.password === pass);
-    if (localUser) {
-      saveSession(localUser); 
-      showToast(`Welcome back, ${localUser.name.split(' ')[0]}! ☕`,'success');
-      if(typeof startNotifications==='function') startNotifications();
-      setTimeout(()=>isAdmin()?showView('admin'):showView('home'),500);
-      return;
-    }
-    
-    // If no local match, try backend
     try {
       const res = await fetch(`${window.FIGHTEA_API_BASE}auth/login`, {
         method: 'POST',
@@ -102,7 +91,7 @@ function initAuth(){
       }
     } catch (err) {
       console.error('Login error:', err);
-      showToast('Invalid email or password.','error');
+      showToast('Connection error. Please try again.','error');
     }
   });
   
