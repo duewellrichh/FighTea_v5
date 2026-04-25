@@ -68,20 +68,10 @@ let VARIETY_ID_SEQ = 1;
 let ORDERS = [];
 
 /* ── USERS ──────────────────────────────────────────────── */
-async function login(email, password) {
-  const res = await fetch(`${window.FIGHTEA_API_BASE}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
-  });
-  const data = await res.json();
-  if (res.ok) {
-    saveSession(data.user); // store logged-in user
-    alert("Login successful!");
-  } else {
-    alert(data.error || "Login failed");
-  }
-}
+let USERS = [
+  { id:1, name:'FighTea Admin', email:'admin@fightea.com', password:'Admin@FighTea2024', role:'admin' },
+];
+let USER_ID_SEQ = 2;
 
 /* ── DEFAULT IMAGE ──────────────────────────────────────── */
 const DEFAULT_IMG = 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&q=80';

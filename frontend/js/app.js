@@ -67,19 +67,35 @@ function closeAdminMobileMenu(){ document.getElementById('admin-mobile-drawer')?
 
 /* ── AUTH ────────────────────────────────────────────────── */
 function initAuth(){
-  document.getElementById('login-form')?.addEventListener('submit',function(e){
+  document.getElementById('login-form')?.addEventListener('submit', async function(e){
     e.preventDefault();
     const email=this.querySelector('[name="email"]').value.trim();
     const pass=this.querySelector('[name="password"]').value;
-    const user=USERS.find(u=>u.email===email&&u.password===pass);
-    if(user){
-      saveSession(user); showToast(`Welcome back, ${user.name.split(',')[0]}! ☕`,'success');
-      if(typeof startNotifications==='function') startNotifications();
-      setTimeout(()=>isAdmin()?showView('admin'):showView('home'),500);
+    
+    try {
+      const res = await fetch(`${window.FIGHTEA_API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        saveSession(data.user); 
+        showToast(`Welcome back, ${data.user.name.split(' ')[0]}! ☕`,'success');
+        if(typeof startNotifications==='function') startNotifications();
+        setTimeout(()=>isAdmin()?showView('admin'):showView('home'),500);
+      } else {
+        showToast(data.error || 'Invalid email or password.','error');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      showToast('Connection error. Please try again.','error');
     }
-    else showToast('Invalid email or password.','error');
   });
-  document.getElementById('signup-form')?.addEventListener('submit',function(e){
+  
+  document.getElementById('signup-form')?.addEventListener('submit', async function(e){
     e.preventDefault();
     const name=this.querySelector('[name="name"]').value.trim();
     const email=this.querySelector('[name="email"]').value.trim();
@@ -87,19 +103,36 @@ function initAuth(){
     const pass=this.querySelector('[name="password"]').value;
     const conf=this.querySelector('[name="confirm"]').value;
     if(pass!==conf){showToast('Passwords do not match.','error');return;}
-    if(USERS.find(u=>u.email===email)){showToast('Email already registered.','error');return;}
-    const newUser={id:USER_ID_SEQ++,name,email,phone,password:pass,role:'customer'};
-    USERS.push(newUser); saveSession(newUser);
-    if(typeof startNotifications==='function') startNotifications();
-    showToast(`Welcome to FighTea, ${name.split(' ')[0]}! 🧋`,'success');
-    setTimeout(()=>showView('home'),600);
+    
+    try {
+      const res = await fetch(`${window.FIGHTEA_API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, phone, password: pass })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        showToast('Account created successfully! Please log in.','success');
+        switchAuthTab('login');
+        document.getElementById('login-form').querySelector('[name="email"]').value = email;
+      } else {
+        showToast(data.error || 'Registration failed.','error');
+      }
+    } catch (err) {
+      console.error('Registration error:', err);
+      showToast('Connection error. Please try again.','error');
+    }
   });
 }
+
 function logout(){
   if(typeof stopNotifications==='function') stopNotifications();
   clearSession();App.cart=[];updateCartBadge();showView('home');
   showToast('You have been signed out.','info');
 }
+
 function switchAuthTab(tab){
   document.querySelectorAll('.auth-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
   document.getElementById('login-form').style.display=tab==='login'?'block':'none';
