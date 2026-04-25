@@ -1,6 +1,6 @@
 {
   "build": {
-    "outputDirectory": "frontend/html"
+    "outputDirectory": "html"
   },
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
