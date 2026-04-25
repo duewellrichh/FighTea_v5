@@ -1,7 +1,6 @@
 {
-  "build": {
-    "outputDirectory": "html"
-  },
+  "buildCommand": "echo 'Static site — no build step needed.'",
+  "outputDirectory": ".",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ],
