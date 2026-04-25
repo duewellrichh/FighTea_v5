@@ -14,9 +14,25 @@ const app = express();
 
 // ── Middleware ────────────────────────────────────────────
 app.use(cors({
-  origin:      process.env.FRONTEND_URL,
+  origin: function(origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://frontend-theta-steel-93.vercel.app',
+      'https://duewellrichhs-projects.vercel.app',
+      /vercel\.app$/  // Allow any vercel deployment
+    ];
+    
+    if (!origin || allowedOrigins.some(allowed => {
+      if (allowed instanceof RegExp) return allowed.test(origin);
+      return origin === allowed;
+    })) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS not allowed'));
+    }
+  },
   credentials: true,
-  // Allow SSE content-type through CORS preflight
   allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control'],
   exposedHeaders: ['Content-Type'],
 }));
