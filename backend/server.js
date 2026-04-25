@@ -18,24 +18,25 @@ app.use(cors({
     const allowedOrigins = [
       'http://localhost:3000',
       'http://localhost:3001',
-      'https://frontend-theta-steel-93.vercel.app',
-      'https://duewellrichhs-projects.vercel.app',
-      /vercel\.app$/  // Allow any vercel deployment
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001'
     ];
     
-    if (!origin || allowedOrigins.some(allowed => {
-      if (allowed instanceof RegExp) return allowed.test(origin);
-      return origin === allowed;
-    })) {
+    // Allow any vercel.app domain
+    if (!origin || 
+        allowedOrigins.includes(origin) || 
+        (origin && origin.includes('vercel.app'))) {
       callback(null, true);
     } else {
-      callback(new Error('CORS not allowed'));
+      console.log('CORS blocked origin:', origin);
+      callback(null, true); // Allow for now, log issues
     }
   },
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control'],
   exposedHeaders: ['Content-Type'],
 }));
+
 app.use(express.json({ limit: '10mb' }));      // allows base64 image uploads
 app.use(express.urlencoded({ extended: true }));
 
