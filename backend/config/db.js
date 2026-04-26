@@ -7,11 +7,20 @@
 const mysql = require('mysql2/promise');
 
 const pool = mysql.createPool({
+<<<<<<< HEAD
   host:               process.env.DB_HOST     || 'localhost',
   port:               parseInt(process.env.DB_PORT || '3306'),
   user:               process.env.DB_USER     || 'root',
   password:           process.env.DB_PASS     || '',
   database:           process.env.DB_NAME     || 'fightea_db',
+=======
+  host:               process.env.DB_HOST,
+  port:               parseInt(process.env.DB_PORT),
+  user:               process.env.DB_USER,
+  password:           process.env.DB_PASS,
+  database:           process.env.DB_NAME,
+  ssl:                process.env.DB_SSL === 'true' ? 'Amazon RDS' : false,
+>>>>>>> fef27f4cc1a0ba80081bbc1801bfdbf01ba6e728
   waitForConnections: true,
   connectionLimit:    10,
   queueLimit:         0,

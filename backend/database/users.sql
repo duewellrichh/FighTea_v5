@@ -16,7 +16,11 @@ VALUES (
   'FighTea Admin',
   'admin@fightea.com',
   NULL,
+<<<<<<< HEAD
   '$2b$12$Hyi12wYdga4JjAFaqi5fMerVX0c/HUHF/Fw2FHbA4369yoZ5HJmzO',
+=======
+  '$2b$12$eOkCgzi7mDfGTPJUk9o8Ye/mC3N/quQJPiU50lcrDtup5bSzHmqbe',
+>>>>>>> fef27f4cc1a0ba80081bbc1801bfdbf01ba6e728
   'admin'
 );
 
